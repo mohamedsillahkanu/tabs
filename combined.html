@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced File Combiner Tool - Blue Dark Theme</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #e1effe;
+            background: linear-gradient(135deg, #0a0e1a 0%, #0f1629 25%, #1a237e 75%, #1565c0 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .main-header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 25%, #1e3a8a 75%, #2563eb 100%);
+            color: white;
+            margin-bottom: 2rem;
+            border-radius: 0 0 1rem 1rem;
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.3);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .main-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        }
+
+        .main-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px dashed #2563eb;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 12px 40px rgba(37, 99, 235, 0.2);
+        }
+
+        .upload-section h3 {
+            color: #93c5fd;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .file-input {
+            margin: 1rem 0;
+            padding: 12px 16px;
+            border: 2px solid #1e40af;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.9);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #e1effe;
+            width: 100%;
+            display: block;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        
+        .file-input::-webkit-file-upload-button {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 12px;
+            font-weight: 600;
+        }
+
+        .file-input:hover {
+            border-color: #2563eb;
+            background: rgba(15, 23, 42, 1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(29, 78, 216, 0.3);
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 78, 216, 0.4);
+        }
+
+        .btn:disabled {
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            border-top: 3px solid #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(37, 99, 235, 0.3);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .stats-card h3 {
+            font-size: 2rem;
+            color: #93c5fd;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .file-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            border-left: 4px solid #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-type-badge {
+            display: inline-block;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .file-type-badge.csv {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        }
+
+        .file-type-badge.excel {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+
+        .column-info {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            backdrop-filter: blur(15px);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            border-left: 3px solid #1d4ed8;
+            border: 1px solid rgba(29, 78, 216, 0.2);
+        }
+
+        .column-list {
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 0.5rem 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(30, 64, 175, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #93c5fd;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+            backdrop-filter: blur(15px);
+            color: #93c5fd;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(37, 99, 235, 0.4);
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(29, 78, 216, 0.2);
+        }
+
+        .warning-message {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(8, 145, 178, 0.2) 100%);
+            backdrop-filter: blur(15px);
+            color: #67e8f9;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(185, 28, 28, 0.2) 100%);
+            backdrop-filter: blur(15px);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
+        }
+
+        .expandable {
+            border: 1px solid rgba(30, 64, 175, 0.3);
+            border-radius: 12px;
+            margin: 1rem 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .expandable-header {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(30, 64, 175, 0.2);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #93c5fd;
+            transition: all 0.3s ease;
+        }
+
+        .expandable-header:hover {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(71, 85, 105, 0.95) 100%);
+        }
+
+        .expandable-content {
+            padding: 1rem;
+            display: none;
+        }
+
+        .expandable.open .expandable-content {
+            display: block;
+        }
+
+        .expandable-toggle {
+            font-size: 1.2rem;
+            margin-left: auto;
+            color: #2563eb;
+            transition: transform 0.3s ease;
+        }
+
+        .expandable.open .expandable-toggle {
+            transform: rotate(180deg);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(37, 99, 235, 0.2);
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .section {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            margin: 2rem 0;
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(37, 99, 235, 0.2);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        }
+
+        @media (max-width: 768px) {
+            .main-header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-header p {
+                font-size: 1rem;
+            }
+            
+            .container {
+                padding: 0 10px;
+            }
+            
+            .upload-section {
+                padding: 1rem;
+            }
+        }
+
+        /* Dark theme specific styling */
+        .section h2, .section h3 {
+            color: #93c5fd;
+            margin-bottom: 1rem;
+        }
+
+        .section ul {
+            color: #cbd5e1;
+        }
+
+        .section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Enhanced hover effects for dark theme */
+        .file-card:hover {
+            transform: translateX(5px);
+            transition: transform 0.3s ease;
+            border-left-color: #3b82f6;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Dark theme specific enhancements */
+        .stats-card p {
+            color: #6b7280;
+        }
+
+        .file-card small {
+            color: #6b7280;
+        }
+
+        .column-info strong {
+            color: #93c5fd;
+        }
+
+        /* Additional dark theme styling */
+        .upload-section p {
+            color: #9ca3af;
+        }
+
+        /* Enhanced glass morphism effect */
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-header">
+        <div class="container">
+            <h1>Enhanced File Combiner Tool</h1>
+            <p>Combine multiple XLS, XLSX, and CSV files with ALL columns (common + uncommon)</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <h3>Upload Multiple Files</h3>
+            <p>Upload multiple XLS, XLSX, and CSV files to combine them with ALL columns preserved</p>
+            <input type="file" id="fileInput" class="file-input" multiple accept=".csv,.xlsx,.xls">
+            <div style="margin-top: 1rem;">
+                <button id="processBtn" class="btn" disabled>Process Files</button>
+                <button id="resetBtn" class="btn btn-secondary hidden">Upload New Files</button>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Processing and cleaning uploaded files...</p>
+        </div>
+
+        <!-- Files Summary -->
+        <div id="filesSummary" class="hidden">
+            <h2>Uploaded Files Summary</h2>
+            <div id="statsGrid" class="stats-grid"></div>
+            <div id="fileDetails"></div>
+            <div id="columnAnalysis"></div>
+            <button id="combineBtn" class="btn">Combine Files (ALL Columns)</button>
+        </div>
+
+        <!-- Combination Results -->
+        <div id="combinationResults" class="hidden">
+            <h2>Combined Results</h2>
+            <div id="combinationSummary"></div>
+            <div id="downloadSection">
+                <h3>Download Combined Data</h3>
+                <button id="downloadBtn" class="btn">Download as CSV</button>
+            </div>
+        </div>
+
+        <!-- Features Section (shown when no files uploaded) -->
+        <div id="featuresSection" class="section">
+            <h2>How It Works - Enhanced Version</h2>
+            <div class="feature-grid">
+                <div>
+                    <h3>Enhanced Combination Logic:</h3>
+                    <ul style="margin-left: 2rem; margin-top: 1rem;">
+                        <li><strong>Data Cleaning:</strong> Removes empty rows and unnamed columns before merging</li>
+                        <li><strong>All Columns Preserved:</strong> Combines ALL columns (common + uncommon)</li>
+                        <li><strong>By File Type:</strong> Files are grouped by type (CSV, Excel)</li>
+                        <li><strong>Source Tracking:</strong> A 'source_file' column tracks original files</li>
+                        <li><strong>Missing Data Handling:</strong> Missing columns filled with empty values</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Data Cleaning Features:</h3>
+                    <ul style="margin-left: 2rem; margin-top: 1rem;">
+                        <li>Removes rows where first column is empty</li>
+                        <li>Removes "Unnamed" columns</li>
+                        <li>Removes completely empty rows</li>
+                        <li>Preserves all meaningful data</li>
+                        <li>Complete data preservation</li>
+                        <li>Clear source file tracking</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>Enhanced Tool Features</h2>
+            <div class="feature-grid">
+                <div>
+                    <h3>Enhanced Processing:</h3>
+                    <ul style="margin-left: 2rem; margin-top: 1rem;">
+                        <li>Automatic data cleaning</li>
+                        <li>Preserve ALL columns (common + unique)</li>
+                        <li>Remove empty/unnamed data</li>
+                        <li>Smart column alignment</li>
+                        <li>Detailed progress reporting</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Improved Combination:</h3>
+                    <ul style="margin-left: 2rem; margin-top: 1rem;">
+                        <li>No data loss (all columns preserved)</li>
+                        <li>Clean, organized output</li>
+                        <li>Comprehensive column analysis</li>
+                        <li>Statistics without data display</li>
+                        <li>CSV download option</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Enhanced File Combiner Tool v2.0 | Preserves ALL Columns</p>
+    </div>
+
+    <script>
+        class FileCombiner {
+            constructor() {
+                this.filesData = [];
+                this.combinedData = null;
+                this.combinationLog = [];
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('fileInput').addEventListener('change', this.handleFileSelection.bind(this));
+                document.getElementById('processBtn').addEventListener('click', this.processFiles.bind(this));
+                document.getElementById('combineBtn').addEventListener('click', this.combineFiles.bind(this));
+                document.getElementById('resetBtn').addEventListener('click', this.resetApplication.bind(this));
+                document.getElementById('downloadBtn').addEventListener('click', this.downloadCombinedData.bind(this));
+            }
+
+            handleFileSelection(event) {
+                const files = event.target.files;
+                const processBtn = document.getElementById('processBtn');
+                
+                if (files.length > 0) {
+                    processBtn.disabled = false;
+                    processBtn.textContent = `Process ${files.length} File(s)`;
+                } else {
+                    processBtn.disabled = true;
+                    processBtn.textContent = 'Process Files';
+                }
+            }
+
+            async processFiles() {
+                const fileInput = document.getElementById('fileInput');
+                const files = fileInput.files;
+                
+                if (files.length === 0) return;
+
+                this.showLoading(true);
+                this.hideElement('featuresSection');
+                this.filesData = [];
+
+                try {
+                    for (let file of files) {
+                        const data = await this.readFile(file);
+                        if (data) {
+                            this.filesData.push(data);
+                        }
+                    }
+
+                    if (this.filesData.length > 0) {
+                        this.displayFilesSummary();
+                    }
+                } catch (error) {
+                    this.showError('Error processing files: ' + error.message);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const fileExtension = file.name.toLowerCase().split('.').pop();
+                    const reader = new FileReader();
+
+                    reader.onload = (e) => {
+                        try {
+                            let data, fileType;
+
+                            if (fileExtension === 'csv') {
+                                const csvText = e.target.result;
+                                const parsed = Papa.parse(csvText, {
+                                    header: true,
+                                    skipEmptyLines: true,
+                                    dynamicTyping: true
+                                });
+                                data = parsed.data;
+                                fileType = 'CSV';
+                            } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+                                const workbook = XLSX.read(e.target.result, { type: 'array' });
+                                const firstSheetName = workbook.SheetNames[0];
+                                const worksheet = workbook.Sheets[firstSheetName];
+                                data = XLSX.utils.sheet_to_json(worksheet);
+                                fileType = 'Excel';
+                            } else {
+                                reject(new Error(`Unsupported file type: ${fileExtension}`));
+                                return;
+                            }
+
+                            // Clean the data
+                            const cleanedData = this.cleanData(data, file.name);
+                            
+                            resolve({
+                                name: file.name,
+                                type: fileType,
+                                data: cleanedData,
+                                originalSize: data.length,
+                                cleanedSize: cleanedData.length,
+                                columns: Object.keys(cleanedData[0] || {})
+                            });
+                        } catch (error) {
+                            reject(new Error(`Error reading ${file.name}: ${error.message}`));
+                        }
+                    };
+
+                    reader.onerror = () => reject(new Error(`Error reading file: ${file.name}`));
+
+                    if (fileExtension === 'csv') {
+                        reader.readAsText(file);
+                    } else {
+                        reader.readAsArrayBuffer(file);
+                    }
+                });
+            }
+
+            cleanData(data, filename) {
+                if (!data || data.length === 0) return [];
+
+                // Remove rows with empty first column
+                const firstColumnKey = Object.keys(data[0] || {})[0];
+                let cleaned = data.filter(row => {
+                    const firstValue = row[firstColumnKey];
+                    return firstValue !== null && firstValue !== undefined && 
+                           String(firstValue).trim() !== '';
+                });
+
+                // Remove unnamed columns and clean column names
+                cleaned = cleaned.map(row => {
+                    const cleanRow = {};
+                    Object.keys(row).forEach(key => {
+                        const cleanKey = String(key).trim();
+                        if (!cleanKey.toLowerCase().startsWith('unnamed') && 
+                            cleanKey !== 'null' && cleanKey !== '') {
+                            cleanRow[cleanKey] = row[key];
+                        }
+                    });
+                    return cleanRow;
+                });
+
+                // Remove completely empty rows
+                cleaned = cleaned.filter(row => {
+                    return Object.values(row).some(value => 
+                        value !== null && value !== undefined && String(value).trim() !== ''
+                    );
+                });
+
+                return cleaned;
+            }
+
+            displayFilesSummary() {
+                const summaryDiv = document.getElementById('filesSummary');
+                const statsGrid = document.getElementById('statsGrid');
+                const fileDetails = document.getElementById('fileDetails');
+                const columnAnalysis = document.getElementById('columnAnalysis');
+
+                // Stats grid
+                const totalFiles = this.filesData.length;
+                const csvCount = this.filesData.filter(f => f.type === 'CSV').length;
+                const excelCount = this.filesData.filter(f => f.type === 'Excel').length;
+
+                statsGrid.innerHTML = `
+                    <div class="stats-card">
+                        <h3>${totalFiles}</h3>
+                        <p>Total Files</p>
+                    </div>
+                    <div class="stats-card">
+                        <h3>${csvCount}</h3>
+                        <p>CSV Files</p>
+                    </div>
+                    <div class="stats-card">
+                        <h3>${excelCount}</h3>
+                        <p>Excel Files</p>
+                    </div>
+                `;
+
+                // File details
+                let fileDetailsHTML = '<h3>Individual File Details</h3>';
+                this.filesData.forEach((file, index) => {
+                    const badgeClass = file.type === 'CSV' ? 'csv' : 'excel';
+                    fileDetailsHTML += `
+                        <div class="expandable" id="file-${index}">
+                            <div class="expandable-header" onclick="this.parentElement.classList.toggle('open')">
+                                <div>
+                                    <span class="file-type-badge ${badgeClass}">${file.type}</span>
+                                    <strong>${file.name}</strong> (${file.cleanedSize} rows × ${file.columns.length} columns)
+                                </div>
+                                <span class="expandable-toggle">▼</span>
+                            </div>
+                            <div class="expandable-content">
+                                <div class="file-card">
+                                    <p><small>Original: ${file.originalSize} rows → Cleaned: ${file.cleanedSize} rows</small></p>
+                                    <p><strong>All Columns:</strong></p>
+                                    <div class="column-list">${file.columns.join(', ')}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                fileDetails.innerHTML = fileDetailsHTML;
+
+                // Column analysis
+                this.displayColumnAnalysis(columnAnalysis);
+
+                this.showElement('filesSummary');
+            }
+
+            displayColumnAnalysis(container) {
+                const filesByType = this.groupFilesByType();
+                let analysisHTML = '<h3>Column Analysis by File Type</h3>';
+
+                Object.entries(filesByType).forEach(([fileType, files]) => {
+                    if (files.length > 1) {
+                        const allColumns = this.getAllColumns(files);
+                        const commonColumns = this.getCommonColumns(files);
+                        
+                        analysisHTML += `
+                            <div class="column-info">
+                                <strong>${fileType} Files (${files.length} files)</strong><br>
+                                <strong>Total unique columns:</strong> ${allColumns.length}<br>
+                                <strong>Common columns (${commonColumns.length}):</strong> ${commonColumns.length > 0 ? commonColumns.join(', ') : 'None'}<br>
+                                <strong>All columns will be preserved in final output</strong><br>
+                                <small>Files: ${files.map(f => f.name).join(', ')}</small>
+                            </div>
+                            <div class="expandable">
+                                <div class="expandable-header" onclick="this.parentElement.classList.toggle('open')">
+                                    <span>View all ${allColumns.length} columns for ${fileType} files</span>
+                                    <span class="expandable-toggle">▼</span>
+                                </div>
+                                <div class="expandable-content">
+                                    <div class="column-list">${allColumns.join(', ')}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        analysisHTML += `
+                            <div class="column-info">
+                                <strong>${fileType} Files (1 file)</strong><br>
+                                <strong>All ${files[0].columns.length} columns will be preserved</strong><br>
+                                <small>File: ${files[0].name}</small>
+                            </div>
+                        `;
+                    }
+                });
+
+                container.innerHTML = analysisHTML;
+            }
+
+            combineFiles() {
+                this.showLoading(true, 'Combining files with ALL columns...');
+
+                try {
+                    const filesByType = this.groupFilesByType();
+                    this.combinedData = {};
+                    this.combinationLog = [];
+
+                    Object.entries(filesByType).forEach(([fileType, files]) => {
+                        if (files.length === 1) {
+                            // Single file
+                            const combinedData = files[0].data.map(row => ({
+                                ...row,
+                                source_file: files[0].name
+                            }));
+                            this.combinedData[fileType] = combinedData;
+
+                            this.combinationLog.push({
+                                fileType,
+                                filesCombined: 1,
+                                fileNames: [files[0].name],
+                                totalRowsBefore: files[0].cleanedSize,
+                                totalRowsAfter: combinedData.length,
+                                allColumns: [...files[0].columns, 'source_file']
+                            });
+                        } else {
+                            // Multiple files
+                            const allColumns = this.getAllColumns(files);
+                            const combinedRows = [];
+
+                            files.forEach(file => {
+                                file.data.forEach(row => {
+                                    const newRow = {};
+                                    // Add all columns with default empty values
+                                    allColumns.forEach(col => {
+                                        newRow[col] = row[col] || '';
+                                    });
+                                    newRow.source_file = file.name;
+                                    combinedRows.push(newRow);
+                                });
+                            });
+
+                            this.combinedData[fileType] = combinedRows;
+
+                            this.combinationLog.push({
+                                fileType,
+                                filesCombined: files.length,
+                                fileNames: files.map(f => f.name),
+                                totalRowsBefore: files.reduce((sum, f) => sum + f.cleanedSize, 0),
+                                totalRowsAfter: combinedRows.length,
+                                allColumns: [...allColumns, 'source_file'],
+                                commonColumns: this.getCommonColumns(files)
+                            });
+                        }
+                    });
+
+                    this.displayCombinationResults();
+                    this.showSuccess('Files combined successfully with ALL columns preserved!');
+                } catch (error) {
+                    this.showError('Error combining files: ' + error.message);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            displayCombinationResults() {
+                const resultsDiv = document.getElementById('combinationResults');
+                const summaryDiv = document.getElementById('combinationSummary');
+
+                let summaryHTML = '<h3>Combination Summary</h3>';
+
+                this.combinationLog.forEach(log => {
+                    summaryHTML += `
+                        <div class="success-message">
+                            <strong>${log.fileType} Files Combined</strong><br>
+                            <strong>Files:</strong> ${log.filesCombined} files combined<br>
+                            <strong>Names:</strong> ${log.fileNames.join(', ')}<br>
+                            ${log.commonColumns ? `<strong>Common Columns:</strong> ${log.commonColumns.length}<br>` : ''}
+                            <strong>Total Unique Columns:</strong> ${log.allColumns.length - 1}<br>
+                            <strong>Rows:</strong> ${log.totalRowsBefore} → ${log.totalRowsAfter}<br>
+                            <strong>Final Columns (including source_file):</strong> ${log.allColumns.length}
+                        </div>
+                        <div class="expandable">
+                            <div class="expandable-header" onclick="this.parentElement.classList.toggle('open')">
+                                <span>View all ${log.allColumns.length} columns in combined ${log.fileType} data</span>
+                                <span class="expandable-toggle">▼</span>
+                            </div>
+                            <div class="expandable-content">
+                                <div class="column-list">${log.allColumns.join(', ')}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Add data summary for each file type
+                Object.entries(this.combinedData).forEach(([fileType, data]) => {
+                    const numericColumns = this.getNumericColumns(data);
+                    const categoricalColumns = this.getCategoricalColumns(data);
+                    const sourceFiles = [...new Set(data.map(row => row.source_file))];
+
+                    summaryHTML += `
+                        <h3>Combined ${fileType} Data Summary</h3>
+                        <div class="stats-grid">
+                            <div class="stats-card">
+                                <h3>${data.length}</h3>
+                                <p>Rows</p>
+                            </div>
+                            <div class="stats-card">
+                                <h3>${Object.keys(data[0] || {}).length}</h3>
+                                <p>Total Columns</p>
+                            </div>
+                            <div class="stats-card">
+                                <h3>${numericColumns.length}</h3>
+                                <p>Numeric Columns</p>
+                            </div>
+                            <div class="stats-card">
+                                <h3>${sourceFiles.length}</h3>
+                                <p>Source Files</p>
+                            </div>
+                        </div>
+                        <div class="expandable">
+                            <div class="expandable-header" onclick="this.parentElement.classList.toggle('open')">
+                                <span>Column Data Types for ${fileType}</span>
+                                <span class="expandable-toggle">▼</span>
+                            </div>
+                            <div class="expandable-content">
+                                <p><strong>Categorical/Text Columns</strong>: ${categoricalColumns.length}</p>
+                                ${categoricalColumns.length > 0 ? `<p style="margin-left: 1rem;">${categoricalColumns.slice(0, 10).join(', ')}${categoricalColumns.length > 10 ? '...' : ''}</p>` : ''}
+                                <p><strong>Numeric Columns</strong>: ${numericColumns.length}</p>
+                                ${numericColumns.length > 0 ? `<p style="margin-left: 1rem;">${numericColumns.slice(0, 10).join(', ')}${numericColumns.length > 10 ? '...' : ''}</p>` : ''}
+                                <p><strong>Source Tracking</strong>: source_file column</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                summaryDiv.innerHTML = summaryHTML;
+                this.showElement('combinationResults');
+                document.getElementById('resetBtn').classList.remove('hidden');
+            }
+
+            downloadCombinedData() {
+                if (!this.combinedData) return;
+
+                let finalData;
+                const fileTypes = Object.keys(this.combinedData);
+
+                if (fileTypes.length === 1) {
+                    // Single file type
+                    finalData = this.combinedData[fileTypes[0]];
+                } else {
+                    // Multiple file types - combine all
+                    finalData = [];
+                    Object.entries(this.combinedData).forEach(([fileType, data]) => {
+                        const dataWithType = data.map(row => ({
+                            ...row,
+                            data_type: fileType
+                        }));
+                        finalData.push(...dataWithType);
+                    });
+                }
+
+                // Convert to CSV
+                const csvContent = this.convertToCSV(finalData);
+                
+                // Create download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '').replace('T', '_');
+                const filename = fileTypes.length === 1 
+                    ? `combined_${fileTypes[0].toLowerCase()}_data_${timestamp}.csv`
+                    : `combined_all_data_${timestamp}.csv`;
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            convertToCSV(data) {
+                if (!data || data.length === 0) return '';
+                
+                const headers = Object.keys(data[0]);
+                const csvRows = [headers.join(',')];
+                
+                data.forEach(row => {
+                    const values = headers.map(header => {
+                        let value = row[header] || '';
+                        // Escape commas and quotes
+                        if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
+                            value = '"' + value.replace(/"/g, '""') + '"';
+                        }
+                        return value;
+                    });
+                    csvRows.push(values.join(','));
+                });
+                
+                return csvRows.join('\n');
+            }
+
+            groupFilesByType() {
+                const grouped = {};
+                this.filesData.forEach(file => {
+                    if (!grouped[file.type]) {
+                        grouped[file.type] = [];
+                    }
+                    grouped[file.type].push(file);
+                });
+                return grouped;
+            }
+
+            getAllColumns(files) {
+                const allColumns = new Set();
+                files.forEach(file => {
+                    file.columns.forEach(col => allColumns.add(col));
+                });
+                return Array.from(allColumns).sort();
+            }
+
+            getCommonColumns(files) {
+                if (files.length === 0) return [];
+                
+                let common = new Set(files[0].columns);
+                files.slice(1).forEach(file => {
+                    common = new Set([...common].filter(col => file.columns.includes(col)));
+                });
+                return Array.from(common).sort();
+            }
+
+            getNumericColumns(data) {
+                if (!data || data.length === 0) return [];
+                
+                const sampleRow = data[0];
+                return Object.keys(sampleRow).filter(key => {
+                    if (key === 'source_file' || key === 'data_type') return false;
+                    const value = sampleRow[key];
+                    return typeof value === 'number' || (!isNaN(value) && !isNaN(parseFloat(value)));
+                });
+            }
+
+            getCategoricalColumns(data) {
+                if (!data || data.length === 0) return [];
+                
+                const allColumns = Object.keys(data[0]);
+                const numericColumns = this.getNumericColumns(data);
+                return allColumns.filter(col => 
+                    !numericColumns.includes(col) && col !== 'source_file' && col !== 'data_type'
+                );
+            }
+
+            resetApplication() {
+                this.filesData = [];
+                this.combinedData = null;
+                this.combinationLog = [];
+                
+                document.getElementById('fileInput').value = '';
+                document.getElementById('processBtn').disabled = true;
+                document.getElementById('processBtn').textContent = 'Process Files';
+                
+                this.hideElement('filesSummary');
+                this.hideElement('combinationResults');
+                this.hideElement('resetBtn');
+                this.showElement('featuresSection');
+                
+                // Clear any messages
+                const messages = document.querySelectorAll('.success-message, .error-message, .warning-message');
+                messages.forEach(msg => msg.remove());
+            }
+
+            showLoading(show, message = 'Processing and cleaning uploaded files...') {
+                const loadingDiv = document.getElementById('loading');
+                if (show) {
+                    loadingDiv.querySelector('p').textContent = message;
+                    loadingDiv.classList.remove('hidden');
+                } else {
+                    loadingDiv.classList.add('hidden');
+                }
+            }
+
+            showElement(id) {
+                document.getElementById(id).classList.remove('hidden');
+            }
+
+            hideElement(id) {
+                document.getElementById(id).classList.add('hidden');
+            }
+
+            showSuccess(message) {
+                this.showMessage(message, 'success-message');
+            }
+
+            showError(message) {
+                this.showMessage(message, 'error-message');
+            }
+
+            showWarning(message) {
+                this.showMessage(message, 'warning-message');
+            }
+
+            showMessage(message, className) {
+                // Remove existing messages
+                const existingMessages = document.querySelectorAll('.success-message, .error-message, .warning-message');
+                existingMessages.forEach(msg => msg.remove());
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = className;
+                messageDiv.textContent = message;
+                
+                const container = document.querySelector('.container');
+                const uploadSection = document.querySelector('.upload-section');
+                
+                // Find a safe insertion point
+                if (uploadSection && uploadSection.nextSibling) {
+                    container.insertBefore(messageDiv, uploadSection.nextSibling);
+                } else {
+                    // If nextSibling doesn't exist, append after upload section
+                    uploadSection.parentNode.insertBefore(messageDiv, uploadSection.nextElementSibling);
+                }
+                
+                // Auto-remove success messages after 5 seconds
+                if (className === 'success-message') {
+                    setTimeout(() => {
+                        if (messageDiv.parentNode) {
+                            messageDiv.parentNode.removeChild(messageDiv);
+                        }
+                    }, 5000);
+                }
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new FileCombiner();
+        });
+    </script>
+</body>
+</html>
